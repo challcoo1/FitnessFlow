@@ -8,6 +8,7 @@ import { suggestWorkout } from "@/ai/flows/suggest-workout";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/hooks/use-toast";
 import { parseDataPoint } from "@/ai/flows/parse-data-point";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const [fitnessData, setFitnessData] = useState("");
@@ -98,7 +99,20 @@ export default function Home() {
             {parsedData && (
               <div className="mt-4">
                 <h2 className="text-lg font-semibold">Parsed Data:</h2>
-                <pre className="text-muted-foreground">{JSON.stringify(parsedData, null, 2)}</pre>
+                <Card>
+                  <CardContent>
+                    <div className="grid gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Label>Type:</Label>
+                        <span>{parsedData.type}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label>Value:</Label>
+                        <span>{parsedData.value}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
