@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebaseConfig'; // Assuming firebaseConfig is in lib
+import { auth, firebaseConfig } from '@/lib/firebaseConfig'; // Assuming firebaseConfig is in lib
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -18,19 +19,44 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-     if (!email || !password) {
-        setError('Please enter both email and password.');
-        setLoading(false);
-        return;
+
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      setLoading(false);
+      return;
     }
+
+    // Check if Firebase configuration is loaded
+    if (!firebaseConfig || !firebaseConfig.apiKey) {
+      setError('Firebase configuration is not loaded. Please check your environment variables.');
+      setLoading(false);
+      return;
+    }
+
+    // Check if auth is initialized
+    if (!auth) {
+      setError('Firebase Auth is not initialized.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Login successful, maybe redirect or show a success message
       console.log('Login successful!');
+      toast({
+        title: "Login Successful",
+        description: "You have successfully logged in.",
+      });
       // You might want to redirect the user to their dashboard here
-    } catch (error: any) {
-      setError(error.message); // Display Firebase auth errors
-      console.error("Login Error:", error);
+    } catch (loginError: any) {
+      setError(loginError.message || 'Login failed. Please check your credentials.'); // Display Firebase auth errors
+      console.error("Login Error:", loginError);
+      toast({
+        variant: "destructive",
+        title: "Login Error",
+        description: loginError.message || "Failed to log in. Please check your credentials.",
+      });
     } finally {
       setLoading(false);
     }
@@ -73,9 +99,10 @@ export function LoginForm() {
       </CardContent>
       <CardFooter>
         <Button onClick={handleLogin} disabled={loading} className="w-full">
-            {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Logging in...' : 'Login'}
         </Button>
       </CardFooter>
     </Card>
   );
 }
+

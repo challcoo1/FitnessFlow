@@ -7,12 +7,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBGQq2bF3tawzdeJFnUKPxrL6IY7MTQXUE",
-  authDomain: "fitjournalai.firebaseapp.com",
-  projectId: "fitjournalai",
-  storageBucket: "fitjournalai.firebasestorage.app",
-  messagingSenderId: "928808625672",
-  appId: "1:928808625672:web:43108e8d951bd69be4d3bd"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Validate that environment variables are set
@@ -35,4 +35,4 @@ if (!getApps().length) {
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db };
+export { app, auth, db, firebaseConfig };
