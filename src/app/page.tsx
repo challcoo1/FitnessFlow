@@ -7,11 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { suggestWorkout } from "@/ai/flows/suggest-workout";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/hooks/use-toast";
+import { parseDataPoint } from "@/ai/flows/parse-data-point";
 
 export default function Home() {
   const [fitnessData, setFitnessData] = useState("");
   const [recommendations, setRecommendations] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [parsedData, setParsedData] = useState<any | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -37,6 +40,29 @@ export default function Home() {
     }
   };
 
+  const handleParseData = async () => {
+    setIsParsing(true);
+    setParsedData(null);
+    try {
+      const result = await parseDataPoint({ text: fitnessData });
+      setParsedData(result);
+      toast({
+        title: "Data parsed!",
+        description: "Check out the parsed data.",
+      });
+    } catch (error: any) {
+      console.error("Error parsing data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to parse data.",
+      });
+      setParsedData(null);
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-background">
       <Toaster />
@@ -52,13 +78,29 @@ export default function Home() {
               onChange={(e) => setFitnessData(e.target.value)}
               className="resize-none"
             />
-            <Button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="bg-accent text-accent-foreground hover:bg-accent/80"
-            >
-              {isLoading ? "Generating..." : "Get Recommendations"}
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="bg-accent text-accent-foreground hover:bg-accent/80"
+              >
+                {isLoading ? "Generating..." : "Get Recommendations"}
+              </Button>
+              <Button
+                onClick={handleParseData}
+                disabled={isParsing}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              >
+                {isParsing ? "Parsing..." : "Parse Data"}
+              </Button>
+            </div>
+
+            {parsedData && (
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">Parsed Data:</h2>
+                <pre className="text-muted-foreground">{JSON.stringify(parsedData, null, 2)}</pre>
+              </div>
+            )}
 
             {recommendations && (
               <div className="mt-4">
